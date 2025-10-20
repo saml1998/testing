@@ -9,8 +9,14 @@
     className="w-full p-2 border border-gray-300 rounded-md text-sm"
   >
     <option value="All Practices">All Practices</option>
-    {platform?.platform && platformPractices[platform.platform]?.map((practice) => (
-      <option key={practice} value={practice}>{practice}</option>
-    ))}
+    {(() => {
+      const key = platform?.platform?.trim();
+      const practices = key ? platformPractices[key] : [];
+      return practices?.map((practice: string) => (
+        <option key={practice} value={practice}>
+          {practice}
+        </option>
+      ));
+    })()}
   </select>
 </div>
