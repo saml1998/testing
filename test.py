@@ -1,11 +1,47 @@
-# Database connection
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:<your_password>@localhost:5432/opco_db")
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+# ============================================
+#   CATALOG APIS (platform, practice, offering)
+# ============================================
 
-def fetch_all(sql: str, params: dict | None = None):
-    with engine.connect() as conn:
-        result = conn.execute(text(sql), params or {})
-        return [dict(r._mapping) for r in result]
+@router.get("/catalog/platforms")
+def get_all_platforms_from_db():
+    """
+    Get all platform records from database
+    """
+    sql = """
+    SELECT platform_id, platform_name 
+    FROM public.platform_catalog
+    ORDER BY platform_name;
+    """
+    return fetch_all(sql)
+
+
+@router.get("/catalog/practices")
+def get_practices_by_platform(platformId: int):
+    """
+    Get all practices for a given platform
+    """
+    sql = """
+    SELECT practice_id, practice_name 
+    FROM public.practice_catalog
+    WHERE platform_id = :platform_id
+    ORDER BY practice_name;
+    """
+    return fetch_all(sql, {"platform_id": platformId})
+
+
+@router.get("/catalog/offerings")
+def get_offerings_by_practice(practiceId: int):
+    """
+    Get all offerings for a given practice
+    """
+    sql = """
+    SELECT offering_id, offering_name 
+    FROM public.offering_catalog
+    WHERE practice_id = :practice_id
+    ORDER BY offering_name;
+    """
+    return fetch_all(sql, {"practice_id": practiceId})
+
 
 
 
