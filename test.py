@@ -1,46 +1,38 @@
-# ============================================
-#   CATALOG APIS (platform, practice, offering)
-# ============================================
+import psycopg2
+import csv
 
-@router.get("/catalog/platforms")
-def get_all_platforms_from_db():
-    """
-    Get all platform records from database
-    """
-    sql = """
-    SELECT platform_id, platform_name 
-    FROM public.platform_catalog
-    ORDER BY platform_name;
-    """
-    return fetch_all(sql)
+conn = psycopg2.connect(
+    dbname="opco_db",
+    user="adminuser",
+    password="<your_password>",
+    host="localhost",
+    port="5432"
+)
+cur = conn.cursor()
 
+def load_csv_to_table(csv_file, table_name, columns):
+    with open(csv_file, 'r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            placeholders = ', '.join(['%s'] * len(columns))
+            sql = f"INSERT INTO public.{table_name} ({', '.join(columns)}) VALUES ({placeholders}) ON CONFLICT DO NOTHING;"
+            cur.execute(sql, [row[c] for c in columns])
+    conn.commit()
 
-@router.get("/catalog/practices")
-def get_practices_by_platform(platformId: int):
-    """
-    Get all practices for a given platform
-    """
-    sql = """
-    SELECT practice_id, practice_name 
-    FROM public.practice_catalog
-    WHERE platform_id = :platform_id
-    ORDER BY practice_name;
-    """
-    return fetch_all(sql, {"platform_id": platformId})
+# Load platform data
+load_csv_to_table('platform.csv', 'platform_catalog', ['platform_code', 'platform_name'])
 
+# Load practice data
+load_csv_to_table('practice.csv', 'practice_catalog', ['platform_code', 'practice_code', 'practice_name'])
 
-@router.get("/catalog/offerings")
-def get_offerings_by_practice(practiceId: int):
-    """
-    Get all offerings for a given practice
-    """
-    sql = """
-    SELECT offering_id, offering_name 
-    FROM public.offering_catalog
-    WHERE practice_id = :practice_id
-    ORDER BY offering_name;
-    """
-    return fetch_all(sql, {"practice_id": practiceId})
+# Load offering data
+load_csv_to_table('offering.csv', 'offering_catalog', ['platform_code', 'practice_code', 'offering_code', 'offering_name'])
+
+cur.close()
+conn.close()
+
+print("✅ All CSV data loaded successfully!")
+
 
 
 
