@@ -1,11 +1,4 @@
--- 1️⃣  Insert data into platform_catalog
-INSERT INTO public.platform_catalog (platform_code, platform_name)
-VALUES
-  ('AZ', 'Azure'),
-  ('AW', 'AWS'),
-  ('GC', 'Google Cloud');
-
--- 2️⃣  Insert data into practice_catalog (linked to platform)
+-- Insert data into practice_catalog (linked to platform)
 INSERT INTO public.practice_catalog (platform_id, practice_code, practice_name)
 SELECT p.platform_id, v.practice_code, v.practice_name
 FROM public.platform_catalog p
@@ -15,9 +8,10 @@ JOIN (VALUES
   ('AW','DATA','Data Analytics'),
   ('GC','APP','App Modernization')
 ) AS v(platform_code, practice_code, practice_name)
-  ON p.platform_code = v.platform_code;
+  ON p.platform_code = v.platform_code
+ON CONFLICT DO NOTHING;  -- prevents duplicate insert
 
--- 3️⃣  Insert data into offering_catalog (linked to practice)
+-- Insert data into offering_catalog (linked to practice)
 INSERT INTO public.offering_catalog (practice_id, offering_code, offering_name)
 SELECT pr.practice_id, v.offering_code, v.offering_name
 FROM public.practice_catalog pr
@@ -28,7 +22,9 @@ JOIN (VALUES
   ('AW','DATA','ANL','Analytics Pipeline'),
   ('GC','APP','DEP','Deployment Automation')
 ) AS v(platform_code, practice_code, offering_code, offering_name)
-  ON p.platform_code = v.platform_code AND pr.practice_code = v.practice_code;
+  ON p.platform_code = v.platform_code AND pr.practice_code = v.practice_code
+ON CONFLICT DO NOTHING;
+
 
 
 
