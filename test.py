@@ -1,21 +1,17 @@
-import os
-from dotenv import load_dotenv
+# backend/app/settings.py
+from pydantic import BaseSettings
 
-# Load .env file
-load_dotenv()
+class Settings(BaseSettings):
+    DATABASE_HOST: str = "localhost"         # Change if using Azure/Postgres Cloud
+    DATABASE_PORT: int = 5432
+    DATABASE_USER: str = "adminuser"         # Change to your Postgres username
+    DATABASE_PASSWORD: str = "YourPassword"  # Replace with your actual password
+    DATABASE_NAME: str = "postgres"          # Or your DB name (like opco_db)
 
-# Read environment variables
-DATABASE_HOST = os.getenv("DATABASE_HOST")
-DATABASE_PORT = os.getenv("DATABASE_PORT")
-DATABASE_NAME = os.getenv("DATABASE_NAME")
-DATABASE_USER = os.getenv("DATABASE_USER")
-DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
+    class Config:
+        env_file = ".env"  # Allows loading from .env automatically
 
-# Construct Azure PostgreSQL URL with SSL enabled
-DATABASE_URL = (
-    f"postgresql://{DATABASE_USER}:{DATABASE_PASSWORD}"
-    f"@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE_NAME}?sslmode=require"
-)
+settings = Settings()
 
 
 
