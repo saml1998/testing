@@ -1,6 +1,16 @@
-UPDATE adoption_usage_metrics
-SET ai_enabled_offering_rate = 44.00
-WHERE ai_enabled_offering_rate IS NULL;
+const chartData = platforms
+  .filter((platform) => platform.impactPercentage !== null && platform.impactPercentage >= 0)
+  .map((platform, index) => ({
+    name: platform.shortName,
+    percentage:
+      typeof platform.impactPercentage === "number"
+        ? platform.impactPercentage
+        : 0,
+    color: platformColors[index % platformColors.length].color,
+    textColor:
+      platformColors[index % platformColors.length].textColor as "white" | "dark",
+  }));
+
 
 
 
